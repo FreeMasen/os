@@ -18,7 +18,10 @@ extern "C" fn _start() -> ! {
 }
 #[cfg(not(test))]
 fn rmain() {
-    panic!("Hello worl{}", "d");
+    os::init();
+    unsafe {
+        *(0xdeadbeef as *mut u64) = 42;
+    };
 }
 #[cfg(not(test))]
 #[panic_handler]
