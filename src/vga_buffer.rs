@@ -135,15 +135,16 @@ impl Write for Writer {
 }
 
 #[macro_export]
+macro_rules! println {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
+
+#[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
 }
 
-#[macro_export]
-macro_rules! println {
-    () => (print!("\n"));
-    ($($arg:tt)*) => (print!("{}\n", format_args!($($arg)*)));
-}
 
 #[doc(hidden)]
 pub fn _print(args: core::fmt::Arguments) {
@@ -210,7 +211,6 @@ mod test {
             println!("{}", lines[i]);
         }
         check_writer_line(0, lines[lines.len() - H]);
-        serial::SERIAL.lock().
     }
 
     fn check_writer_line(line: usize, against: &str) {
