@@ -14,7 +14,7 @@ extern "C" fn _start() -> ! {
     #[cfg(test)]
     tmain();
 
-    loop {}
+    os::hlt_loop()
 }
 #[cfg(not(test))]
 fn rmain() {
@@ -27,7 +27,7 @@ fn rmain() {
 #[panic_handler]
 fn panic_handler(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    os::hlt_loop()
 }
 
 #[cfg(test)]

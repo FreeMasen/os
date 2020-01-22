@@ -12,6 +12,8 @@ pub mod vga_buffer;
 
 use core::panic::PanicInfo;
 
+/// Initialize the kernel
+/// for normal operation
 pub fn init() {
     gdt::init();
     interupt::init_idt();
@@ -22,7 +24,7 @@ pub fn init() {
 pub extern "C" fn _start() -> ! {
     init();
     test_main();
-    loop {}
+    hlt_loop()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -36,7 +38,7 @@ pub fn test_panic(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
     serial_println!("{}", info);
     exit_qemu(QemuExitCode::Failed);
-    loop {}
+    hlt_loop()
 }
 
 #[cfg(test)]
@@ -59,5 +61,15 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
     unsafe {
         let mut port = Port::new(0xf4);
         port.write(exit_code as u32);
+    }
+}
+
+/// Call the `hlt` instruction in
+/// a tight loop. This will sleep
+/// the processor until the next
+/// interrupt arrives
+pub fn hlt_loop() -> ! {
+    loop {
+        x86_64::instructions::hlt();
     }
 }
