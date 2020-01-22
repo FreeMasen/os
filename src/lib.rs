@@ -17,6 +17,8 @@ use core::panic::PanicInfo;
 pub fn init() {
     gdt::init();
     interupt::init_idt();
+    interupt::init_pics();
+    x86_64::instructions::interrupts::enable();
 }
 
 #[cfg(test)]

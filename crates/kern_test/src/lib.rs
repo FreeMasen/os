@@ -22,9 +22,11 @@ fn insert_logging(tokens: Item) -> proc_macro2::TokenStream {
         #[test_case]
         fn #name2() {
             #f
-            serial_print!("running {}... ", #name);
-            #orig();
-            serial_println!("[ok]");
+            x86_64::instructions::interrupts::without_interrupts(|| {
+                serial_print!("running {}... ", #name);
+                #orig();
+                serial_println!("[ok]");
+            });
         }
     }
 }

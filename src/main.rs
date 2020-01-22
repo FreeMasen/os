@@ -19,9 +19,8 @@ extern "C" fn _start() -> ! {
 #[cfg(not(test))]
 fn rmain() {
     os::init();
-    unsafe {
-        *(0xdeadbeef as *mut u64) = 42;
-    };
+    println!("It did not crash");
+    os::hlt_loop()
 }
 #[cfg(not(test))]
 #[panic_handler]

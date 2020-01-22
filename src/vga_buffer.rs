@@ -109,7 +109,7 @@ impl Writer {
         self.col = 0;
     }
 
-    pub(crate) fn clear(&mut self) {
+    pub fn clear(&mut self) {
         for row in 1..BUFFER_HEIGHT {
             self.clear_row(row);
         }
@@ -148,7 +148,10 @@ macro_rules! print {
 
 #[doc(hidden)]
 pub fn _print(args: core::fmt::Arguments) {
-    WRITER.lock().write_fmt(args).unwrap();
+    use x86_64::instructions::interrupts::without_interrupts;
+    without_interrupts(|| {
+        WRITER.lock().write_fmt(args).unwrap();
+    });
 }
 
 #[cfg(test)]
