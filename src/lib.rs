@@ -7,6 +7,7 @@
 
 pub mod gdt;
 pub mod interupt;
+pub mod memory;
 pub mod serial;
 pub mod vga_buffer;
 

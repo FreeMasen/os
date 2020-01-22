@@ -9,15 +9,15 @@ edition = "2018"
 [dependencies]
 spin = "0.5"
 volatile = "0.2"
-bootloader = "0.8"
+bootloader = { version = "0.8", features = ["map_physical_memory"] }
 x86_64 = "0.8"
 uart_16550 = "0.2"
 kern_test = { path = "./crates/kern_test" }
 pic8259_simple = "0.1"
-pc-keyboard = "0.3"
+pc-keyboard = "0.5"
 
 [dependencies.lazy_static]
-version = "1.0"
+version = "1"
 features = ["spin_no_std"]
 
 [profile.dev]
