@@ -3,10 +3,10 @@
 #![feature(custom_test_frameworks)]
 #![reexport_test_harness_main = "test_main"]
 #![test_runner(os::test_runner)]
-use os::{println, serial_print, serial_println};
 use kern_test::kern_test;
+use os::{println, serial_print, serial_println};
 
-#[no_mangle] 
+#[no_mangle]
 pub extern "C" fn _start() -> ! {
     test_main();
 

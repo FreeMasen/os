@@ -1,10 +1,6 @@
 use x86_64::{
     structures::{
-        gdt::{
-            Descriptor,
-            GlobalDescriptorTable,
-            SegmentSelector,
-        },
+        gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector},
         tss::TaskStateSegment,
     },
     VirtAddr,
@@ -30,10 +26,7 @@ struct Gdt {
 }
 impl Gdt {
     pub fn new(table: GlobalDescriptorTable, selectors: Selectors) -> Self {
-        Self {
-            table,
-            selectors,
-        }
+        Self { table, selectors }
     }
 
     pub fn load(&'static self) {
@@ -48,10 +41,7 @@ struct Selectors {
 
 impl Selectors {
     pub fn new(code: SegmentSelector, tss: SegmentSelector) -> Self {
-        Self {
-            code,
-            tss,
-        }
+        Self { code, tss }
     }
 }
 
@@ -65,10 +55,7 @@ lazy_static::lazy_static! {
     };
 }
 pub fn init() {
-    use x86_64::instructions::{
-        segmentation::set_cs,
-        tables::load_tss,
-    };
+    use x86_64::instructions::{segmentation::set_cs, tables::load_tss};
     GDT.load();
     unsafe {
         set_cs(GDT.selectors.code);

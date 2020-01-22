@@ -34,4 +34,3 @@ fn panic_handler(info: &PanicInfo) -> ! {
 fn panic(info: &PanicInfo) -> ! {
     os::test_panic(info)
 }
-
