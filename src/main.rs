@@ -3,11 +3,12 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(os::test_runner)]
 #![reexport_test_harness_main = "tmain"]
-
+extern crate alloc;
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 use os::println;
-use x86_64::{structures::paging::{MapperAllSizes, Page}, VirtAddr};
+
+use alloc::{boxed::Box, rc::Rc};
 
 #[cfg(not(test))]
 entry_point!(rmain);
@@ -16,22 +17,19 @@ fn rmain(boot_info: &'static BootInfo) -> ! {
     os::init();
     println!("Hello, World!");
     let offset = x86_64::VirtAddr::new(boot_info.physical_memory_offset);
-    
-    let addrs = [
-        0xb8000,
-        0x201008,
-        0x200_0020_1a10,
-        boot_info.physical_memory_offset,
-    ];
     let mut m = unsafe { os::memory::init(offset) };
-    let page = Page::containing_address(VirtAddr::new(0));
     let mut frame_allocator = unsafe {
         os::memory::BootInfoFrameAllocator::init(&boot_info.memory_map)
     };
-    os::memory::create_example_mapping(page, &mut m, &mut frame_allocator);
-    let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
-    unsafe { page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e)};
-    println!("It did not crash!");
+    os::allocator::init_heap(&mut m, &mut frame_allocator).expect("failed to create heap");
+    let x = Box::new(41);
+    let y = Rc::new(100);
+    {
+        let q = y.clone();
+        println!("ref count: {}", Rc::strong_count(&y));
+    }
+    println!("ref count 2: {}", Rc::strong_count(&y));
+    println!("It did not crash!: {:?}", x);
     os::hlt_loop()
 }
 

@@ -15,6 +15,7 @@ uart_16550 = "0.2"
 kern_test = { path = "./crates/kern_test" }
 pic8259_simple = "0.1"
 pc-keyboard = "0.5"
+linked_list_allocator = "0.6"
 
 [dependencies.lazy_static]
 version = "1"
