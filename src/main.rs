@@ -25,7 +25,7 @@ fn rmain(boot_info: &'static BootInfo) -> ! {
     let x = Box::new(41);
     let y = Rc::new(100);
     {
-        let q = y.clone();
+        let _q = y.clone();
         println!("ref count: {}", Rc::strong_count(&y));
     }
     println!("ref count 2: {}", Rc::strong_count(&y));

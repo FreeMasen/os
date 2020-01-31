@@ -27,6 +27,7 @@ mod tests {
     }
     #[kern_test]
     fn reuse_mem() {
+        let _first = Box::new(-1);
         for i in 0..os::allocator::HEAP_SIZE {
             let x = Box::new(i);
             assert_eq!(*x, i);

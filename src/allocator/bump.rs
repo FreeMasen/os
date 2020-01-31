@@ -1,7 +1,7 @@
 use alloc::alloc::Layout;
 
 
-use super::{align, Locked};
+use super::{align, Alloc};
 
 pub struct Bumper {
     heap_start: usize,
@@ -26,24 +26,22 @@ impl Bumper {
     }
 }
 
-unsafe impl alloc::alloc::GlobalAlloc for Locked<Bumper> {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        let mut b = self.lock();
-        let start = align(b.next, layout.align());
+impl Alloc for Bumper {
+    fn alloc(&mut self, layout: Layout) -> *mut u8 {
+        let start = align(self.next, layout.align());
         let end = start + layout.size();
-        if end > b.heap_end {
+        if end > self.heap_end {
             core::ptr::null_mut()
         } else {
-            b.next = end;
-            b.allocs += 1;
+            self.next = end;
+            self.allocs += 1;
             start as _
         }
     }
-    unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
-        let mut b = self.lock();
-        b.allocs -= 1;
-        if b.allocs == 0 {
-            b.next = b.heap_start;
+    fn dealloc(&mut self, _ptr: *mut u8, _layout: Layout) {
+        self.allocs -= 1;
+        if self.allocs == 0 {
+            self.next = self.heap_start;
         }
     }
 }

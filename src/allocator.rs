@@ -2,7 +2,6 @@ use alloc::alloc::{
     GlobalAlloc,
     Layout,
 };
-use core::ptr::null_mut;
 use crate::error::Error;
 use spin::{Mutex, MutexGuard};
 use x86_64::{
@@ -12,11 +11,16 @@ use x86_64::{
     VirtAddr,
 };
 
-pub mod bump;
-use bump::Bumper;
+pub mod slab;
+use slab::Slabber;
 
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024;
+
+pub trait Alloc {
+    fn alloc(&mut self, layout: Layout) -> *mut u8;
+    fn dealloc(&mut self, _ptr: *mut u8, _layout: Layout);
+}
 
 pub struct Locked<A>(Mutex<A>);
 
@@ -30,7 +34,7 @@ impl<A> Locked<A> {
 }
 
 #[global_allocator]
-static ALLOCATOR: Locked<Bumper> = Locked::new(Bumper::new());
+static ALLOCATOR: Locked<Slabber> = Locked::new(Slabber::new());
 pub fn init_heap(mapper: &mut impl Mapper<Size4KiB>, frame_alloc: &mut impl FrameAllocator<Size4KiB>) -> Result<(), Error> {
     let pages = {
         let start = VirtAddr::new(HEAP_START as u64);
@@ -52,14 +56,15 @@ pub fn init_heap(mapper: &mut impl Mapper<Size4KiB>, frame_alloc: &mut impl Fram
     Ok(())
 }
 
-pub struct DumbAlloc;
+unsafe impl<I: Alloc> GlobalAlloc for Locked<I> {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        let mut me = self.lock();
+        me.alloc(layout)
 
-unsafe impl GlobalAlloc for DumbAlloc {
-    unsafe fn alloc(&self, _layout: Layout) -> *mut u8 {
-        null_mut()
     }
-    unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
-        unreachable!("dealloc should never be called")
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        let mut me = self.lock();
+        me.dealloc(ptr, layout);
     }
 }
 
